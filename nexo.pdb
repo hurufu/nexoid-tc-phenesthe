@@ -1,4 +1,4 @@
-:- consult(phenesthe).
+:- consult('Phenesthe/phenesthe').
 :- initialization(recognize).
 
 input_phenomenon(exchange(id(_),req(output(language(_),what(_)))), event).
