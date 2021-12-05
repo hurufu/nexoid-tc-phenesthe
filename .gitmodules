@@ -1,0 +1,3 @@
+[submodule "phenesthe"]
+	path = Phenesthe
+	url = https://github.com/manospits/Phenesthe.git
