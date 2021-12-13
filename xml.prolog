@@ -5,6 +5,8 @@
 input_phenomenon(exchange(id(_),req(output(language(_),what(_)))), event).
 input_phenomenon(exchange(id(_),req(output(language(_),what(_,_)))), event).
 input_phenomenon(exchange(id(_),req(output(language(_),what(_,_,_)))), event).
+input_phenomenon(exchange(id(_),req(entry(language(_),what(_)))), event).
+input_phenomenon(exchange(id(_),req(entry(language(_),what(_,_)))), event).
 input_phenomenon(exchange(id(_),req(updateInterfaces(interfaceStatus(_)))), event).
 input_phenomenon(exchange(id(_),req(print(type(_)))), event).
 input_phenomenon(exchange(id(_),rsp(_)), event).
@@ -23,6 +25,11 @@ event_phenomenon prv:output(Lang, Msg, Id) :=
     exchange(id(Id), req(output(language(Lang),what(Msg,_,_)))) or
     exchange(id(Id), req(output(language(Lang),what(_,Msg,_)))) or
     exchange(id(Id), req(output(language(Lang),what(_,_,Msg)))).
+
+event_phenomenon prv:prompt(Lang, Msg, Id) :=
+    exchange(id(Id), req(entry(language(Lang),what(Msg)))) or
+    exchange(id(Id), req(entry(language(Lang),what(Msg,_)))) or
+    exchange(id(Id), req(entry(language(Lang),what(_,Msg)))).
 
 event_phenomenon notification(E) :=
     exchange(id(_),ntf(events(E))) or
@@ -44,8 +51,14 @@ event_phenomenon notification(E) :=
 event_phenomenon prv:ack(Id) :=
     exchange(id(Id), rsp(ack)).
 
+event_phenomenon prv:ackEntry(Id, Data) :=
+    exchange(id(Id), rsp(ackEntry(Data))).
+
 state_phenomenon prv:req_ack(Lang, Msg) :=
     prv:output(Lang, Msg, Id) ~> prv:ack(Id).
+
+state_phenomenon prv:req_ack_entry(Lang, Msg, Data) :=
+    prv:prompt(Lang, Msg, Id) ~> prv:ackEntry(Id, Data).
 
 event_phenomenon notification(Msg) :=
     exchange(id(_), ntf(events(L))) and
@@ -54,11 +67,17 @@ event_phenomenon notification(Msg) :=
 event_phenomenon output(Lang, Msg) :=
     end(prv:req_ack(Lang, Msg)).
 
+event_phenomenon prompt(Lang, Msg) :=
+    end(prv:req_ack_entry(Lang, Msg, _)).
+
 event_phenomenon updateInterfaces(Status) :=
     end(exchange(id(Id), req(updateInterfaces(interfaceStatus(Status)))) ~> prv:ack(Id)).
 
 event_phenomenon print(Type) :=
     end(exchange(id(Id), req(print(type(Type)))) ~> prv:ack(Id)).
+
+event_phenomenon entry(Data) :=
+    end(prv:req_ack_entry(_, _, Data)).
 
 % Pass Criteria
 state_phenomenon test:dut_asks_to_insert_card_after_swipe :=
