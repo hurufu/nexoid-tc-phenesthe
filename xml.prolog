@@ -170,3 +170,7 @@ term_xml([A|B], [element(N,_,C)|T]) :-
     term_xml(X, C),
     A =.. [N|X],
     term_xml(B,T).
+
+number_digits(Padding, Number, NumberList) :-
+    format(chars(A), "~`0t~d~*|", [Number, Padding]),
+    maplist(atom_number, A, NumberList).
