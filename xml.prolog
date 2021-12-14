@@ -79,11 +79,46 @@ event_phenomenon print(Type) :=
 event_phenomenon entry(Data) :=
     end(prv:req_ack_entry(_, _, Data)).
 
-% Pass Criteria
-state_phenomenon test:dut_asks_to_insert_card_after_swipe :=
-    notification(cardSwiped) ~> output(_, msg(crdhldrEmvInsertCard)).
-state_phenomenon test:dut_eventually_approves_transaction_using_chip :=
-    notification(cardInserted) ~> output(_, msg(crdhldrEmvApproved)).
+% Pass criteria for POI.USE.PAY.MAN.P.01100
+
+% FIXME: It should handle notifications sent separately
+state_phenomenon test:payment_service_is_triggered_by_entering_pan_and_expiry_data_and_amount :=
+    (
+        notification(serviceSelection(serviceId(payment))) and
+        notification(manualEntry(pan(_),expirationDate(year(_),month(_)))) and
+        notification(amountEntry(totalAmount(_),supplementaryAmount(amount(_)),cashbackAmount(_)))
+    ) ~> output(_, msg(crdhldrMsgWelcome)).
+
+% It is impossible for nexoid to ask for an amount, so this test always passes
+%event_phenomenon test:dut_prompts_for_an_amount :=
+%    false.
+%
+event_phenomenon testn:dut_prompts_for_cvd :=
+    prompt(_, msg(crdhldrEntCvd)) or
+    prompt(_, msg(crdhldrEntCvdPresence)).
+
+% FIXME: This event should happend before actual transaction processing
+event_phenomenon test:contactless_reader_isnt_activated :=
+    updateInterfaces(interfaceStatus(0)).
+
+event_phenomenon test:dut_outputs_irrelevant_messages :=
+    output(_, msg(crdhldrMsgPresentCard)) or
+    output(_, msg(crdhldrMsgPresentCardOrUseMagstripe)) or
+    output(_, msg(crdhldrMsgInsertOrPresentCard)) or
+    output(_, msg(crdhldrMsgPleaseInsertCard)).
+
+% TODO: Add support for internal data validation, probably through acquirer
+%       message, receipt or internally.
+%event_phenomenon test:tag_are_present :=
+%    technologySelected: manualEntry
+%    selectedService: payment
+%    pan: <enterend value>
+%    expirationDate: <entered value>
+%    processingStatus: { cardProductSelectionForNonChip
+%                        appProfileSelectionForNonChip
+%                        fullMagStripeOrManualEntry
+%                        technologySelectionNonFallbackMode }
+%    selectedApplicationProfileNumber: <see test description>
 
 recognize :-
     assert_all_input_events,
