@@ -171,3 +171,14 @@ term_xml([A|B], [element(N,_,C)|T]) :-
 number_digits(Padding, Number, NumberList) :-
     format(chars(A), "~`0t~d~*|", [Number, Padding]),
     maplist(atom_number, A, NumberList).
+
+list_service_start_events([A,B,C,D,E,F,G,H], S) :-
+    S = serviceStartEvents(
+        cardInserted(A),
+        cardSwiped(B),
+        amountEntry(C),
+        manualEntry(D),
+        referenceEntry(E),
+        accept(F),
+        cardholderDetect(G),
+        rfu(H)).
