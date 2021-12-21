@@ -54,9 +54,6 @@ event_phenomenon prv:ack(Id) :=
 event_phenomenon prv:ackEntry(Id, Data) :=
     exchange(id(Id), rsp(ackEntry(Data))).
 
-state_phenomenon prv:req_ack(Lang, Msg) :=
-    prv:output(Lang, Msg, Id) ~> prv:ack(Id).
-
 state_phenomenon prv:req_ack_entry(Lang, Msg, Data) :=
     prv:prompt(Lang, Msg, Id) ~> prv:ackEntry(Id, Data).
 
@@ -65,7 +62,7 @@ event_phenomenon notification(Msg) :=
     memberchk(Msg, L).
 
 event_phenomenon output(Lang, Msg) :=
-    end(prv:req_ack(Lang, Msg)).
+    end(prv:output(Lang, Msg, Id) ~> prv:ack(Id)).
 
 event_phenomenon prompt(Lang, Msg) :=
     end(prv:req_ack_entry(Lang, Msg, _)).
