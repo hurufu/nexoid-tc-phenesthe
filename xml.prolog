@@ -80,9 +80,8 @@ event_phenomenon testn:dut_prompts_for_cvd :=
     prompt(_, msg(crdhldrEntCvd)) or
     prompt(_, msg(crdhldrEntCvdPresence)).
 
-% FIXME: This event should happend before actual transaction processing
-event_phenomenon test:contactless_reader_isnt_activated :=
-    updateInterfaces(interfaceStatus(0)).
+dynamic_phenomenon test:contactless_reader_isnt_activated :=
+    updateInterfaces(0) before output(_, msg(crdhldrEmvPleaseWait)).
 
 event_phenomenon test:dut_outputs_irrelevant_messages :=
     output(_, msg(crdhldrMsgPresentCard)) or
