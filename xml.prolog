@@ -133,7 +133,7 @@ query_single(Q) :-
     Q =.. [G,T,X].
 
 main :-
-    findall(P, query(P), L),
+    setof(P, query(P), L),
     phrase(answer(L), W),
     atom_string(A, W),
     write(A).
