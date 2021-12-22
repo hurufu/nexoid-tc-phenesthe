@@ -62,6 +62,7 @@ event_phenomenon print(Type) :=
 event_phenomenon entry(Data) :=
     end(prv:req_ack_entry(_, _, Data)).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pass criteria for POI.USE.PAY.MAN.P.01100
 
 % FIXME: It should handle notifications sent separately
@@ -101,6 +102,8 @@ event_phenomenon test:dut_outputs_irrelevant_messages :=
 %                        fullMagStripeOrManualEntry
 %                        technologySelectionNonFallbackMode }
 %    selectedApplicationProfileNumber: <see test description>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 recognize :-
     assert_all_input_events,
