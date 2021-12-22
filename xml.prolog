@@ -2,21 +2,7 @@
 :- consult('Phenesthe/phenesthe').
 :- initialization(recognize).
 
-input_phenomenon(exchange(id(_),req(output(language(_),what(_)))), event).
-input_phenomenon(exchange(id(_),req(output(language(_),what(_,_)))), event).
-input_phenomenon(exchange(id(_),req(output(language(_),what(_,_,_)))), event).
-input_phenomenon(exchange(id(_),req(entry(language(_),what(_)))), event).
-input_phenomenon(exchange(id(_),req(entry(language(_),what(_,_)))), event).
-input_phenomenon(exchange(id(_),req(updateInterfaces(interfaceStatus(_)))), event).
-input_phenomenon(exchange(id(_),req(print(type(_)))), event).
-input_phenomenon(exchange(id(_),rsp(_)), event).
-input_phenomenon(exchange(id(_),ntf(events(_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_,_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_,_,_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_,_,_,_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_,_,_,_,_))), event).
-input_phenomenon(exchange(id(_),ntf(events(_,_,_,_,_,_,_))), event).
+input_phenomenon(exchange(_Id, _Payload), event).
 
 event_phenomenon prv:output(Lang, Msg, Id) :=
     exchange(id(Id), req(output(language(Lang),what(Msg)))) or
