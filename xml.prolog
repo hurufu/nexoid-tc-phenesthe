@@ -2,21 +2,13 @@
 :- consult('Phenesthe/phenesthe').
 :- initialization(recognize).
 
-input_phenomenon(exchange(_Id, _Payload), event).
+input_phenomenon(exchange(_Id,_Payload), event).
 
-event_phenomenon prv:output(Lang, Msg, Id) :=
-    exchange(id(Id), req(output(language(Lang),what(Msg)))) or
-    exchange(id(Id), req(output(language(Lang),what(Msg,_)))) or
-    exchange(id(Id), req(output(language(Lang),what(_,Msg)))) or
-    exchange(id(Id), req(output(language(Lang),what(Msg,_,_)))) or
-    exchange(id(Id), req(output(language(Lang),what(_,Msg,_)))) or
-    exchange(id(Id), req(output(language(Lang),what(_,_,Msg)))).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SCAP (Sale, Cardholder and Attendant Protocol) rules
 
-event_phenomenon prv:prompt(Lang, Msg, Id) :=
-    exchange(id(Id), req(entry(language(Lang),what(Msg)))) or
-    exchange(id(Id), req(entry(language(Lang),what(Msg,_)))) or
-    exchange(id(Id), req(entry(language(Lang),what(_,Msg)))).
-
+% Any notification may have multiple events in any order, this rule just unwraps
+% them, to simplify the reasoning.
 event_phenomenon notification(E) :=
     exchange(id(_),ntf(events(E))) or
     exchange(id(_),ntf(events(E,_))) or
@@ -34,61 +26,95 @@ event_phenomenon notification(E) :=
     exchange(id(_),ntf(events(_,_,_,E,_))) or
     exchange(id(_),ntf(events(_,_,_,_,E))).
 
-event_phenomenon prv:ack(Id) :=
-    exchange(id(Id), rsp(ack)).
+% SCAP module have selected payment as a current service. Note: this doesn't
+% mean that payment is immidiately started, it is a mere indication that when
+% minimal service start condition will be satisfied then payment should be
+% started. There many more different services defined by nexo.
+event_phenomenon payment :=
+    notification(serviceSelection(serviceId(payment))).
+event_phenomenon refund :=
+    notification(serviceSelection(serviceId(refund))).
+event_phenomenon cancellation :=
+    notification(serviceSelection(serviceId(cancellation))).
+event_phenomenon cardValidityCheck :=
+    notification(serviceSelection(serviceId(cardValidityCheck))).
 
-event_phenomenon prv:ackEntry(Id, Data) :=
-    exchange(id(Id), rsp(ackEntry(Data))).
+% Amount was provided, it may trigger any currently selected service if minimal
+% conditions for the service are set to be amount only. Amount is necessary to
+% start payment, unless the default amount is configured, eg. for parking lots.
+% Rules are different for other services.
+event_phenomenon amount(T,S,C) :=
+    notification(amountEntry(totalAmount(T),supplementaryAmount(amount(S)),cashbackAmount(C))).
 
-state_phenomenon prv:req_ack_entry(Lang, Msg, Data) :=
-    prv:prompt(Lang, Msg, Id) ~> prv:ackEntry(Id, Data).
+% Card data was entered manually it also may start a currently selected service.
+event_phenomenon manual(P,Y,M) :=
+    notification(manualEntry(pan(P),expirationDate(year(Y),month(M)),_CVD)).
 
-event_phenomenon notification(Msg) :=
-    exchange(id(_), ntf(events(L))) and
-    memberchk(Msg, L).
+% Card was inserted into the chip reader, the actual behavior depends on the
+% configuration. It may start a service or it may be ignored and used later when
+% transaction technology will be selected by the terminal.
+event_phenomenon inserted :=
+    notification(cardInserted).
 
-event_phenomenon output(Lang, Msg) :=
-    end(prv:output(Lang, Msg, Id) ~> prv:ack(Id)).
+% Update current state of input devices, like contact chip reader, NFC, etc.
+% If you want to decode status use number_interface_status/2
+dynamic_phenomenon update(Id,S) :=
+    exchange(Id,req(updateInterfaces(interfaceStatus(S)))) before exchange(Id,rsp(ack)).
 
-event_phenomenon prompt(Lang, Msg) :=
-    end(prv:req_ack_entry(Lang, Msg, _)).
+% Print receipt
+dynamic_phenomenon receipt(Id,P) :=
+    exchange(Id,req(print(type(P)))) before exchange(Id,rsp(ack)).
 
-event_phenomenon updateInterfaces(Status) :=
-    end(exchange(id(Id), req(updateInterfaces(interfaceStatus(Status)))) ~> prv:ack(Id)).
+% Display a message to a cardholder xor attendant
+dynamic_phenomenon output(Id,Language,Message) :=
+    (
+        exchange(Id,req(output(language(Language),what(Message)))) or
+        exchange(Id,req(output(language(Language),what(Message,_)))) or
+        exchange(Id,req(output(language(Language),what(_,Message)))) or
+        exchange(Id,req(output(language(Language),what(Message,_,_)))) or
+        exchange(Id,req(output(language(Language),what(_,Message,_)))) or
+        exchange(Id,req(output(language(Language),what(_,_,Message))))
+    ) before (
+        exchange(Id, rsp(ack))
+    ).
 
-event_phenomenon print(Type) :=
-    end(exchange(id(Id), req(print(type(Type)))) ~> prv:ack(Id)).
-
-event_phenomenon entry(Data) :=
-    end(prv:req_ack_entry(_, _, Data)).
+% Request some data from cardholder xor attendant
+dynamic_phenomenon entry(Id,prompt(Language,Message),entry(EnteredData)) := 
+    (
+        exchange(Id,req(entry(Language,what(Message)))) or
+        exchange(Id,req(entry(Language,what(Message,_)))) or
+        exchange(Id,req(entry(Language,what(_,Message)))) or
+        exchange(Id,req(entry(Language,what(Message,_,_)))) or
+        exchange(Id,req(entry(Language,what(_,Message,_)))) or
+        exchange(Id,req(entry(Language,what(_,_,Message))))
+    ) before (
+        exchange(Id,rsp(ackEntry(EnteredData)))
+    ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pass criteria for POI.USE.PAY.MAN.P.01100
 
-% FIXME: It should handle notifications sent separately
-state_phenomenon test:payment_service_is_triggered_by_entering_pan_and_expiry_data_and_amount :=
-    (
-        notification(serviceSelection(serviceId(payment))) and
-        notification(manualEntry(pan(_),expirationDate(year(_),month(_)))) and
-        notification(amountEntry(totalAmount(_),supplementaryAmount(amount(_)),cashbackAmount(_)))
-    ) ~> output(_, msg(crdhldrMsgWelcome)).
-
-% It is impossible for nexoid to ask for an amount, so this test always passes
-%event_phenomenon test:dut_prompts_for_an_amount :=
-%    false.
-%
-event_phenomenon testn:dut_prompts_for_cvd :=
-    prompt(_, msg(crdhldrEntCvd)) or
-    prompt(_, msg(crdhldrEntCvdPresence)).
+% FIXME: Actually payment may be selected at the same time as an amount or manual
+% entry or even it may be set beforhead as a default service
+dynamic_phenomenon test:payment_service_is_triggered_by_entering_pan_and_expiry_data_and_amount(amount(T,S,C), manual(P,Y,M)) :=
+    payment before (manual(P,Y,M) and amount(T,S,C)).
 
 dynamic_phenomenon test:contactless_reader_isnt_activated :=
-    updateInterfaces(0) before output(_, msg(crdhldrEmvPleaseWait)).
+    update(_,0) before output(_,_,msg(crdhldrEmvPleaseWait)).
 
-event_phenomenon test:dut_outputs_irrelevant_messages :=
-    output(_, msg(crdhldrMsgPresentCard)) or
-    output(_, msg(crdhldrMsgPresentCardOrUseMagstripe)) or
-    output(_, msg(crdhldrMsgInsertOrPresentCard)) or
-    output(_, msg(crdhldrMsgPleaseInsertCard)).
+% It is impossible for libnexoid to ask for an amount, so this test always passes
+event_phenomenon neg_test:dut_prompts_for_an_amount := false.
+
+dynamic_phenomenon neg_test:dut_prompts_for_cvd_presence(I,L,D) :=
+    entry(I,L,msg(crdhldrEntCvdPresence),D).
+dynamic_phenomenon neg_test:dut_prompts_for_cvd(I,L,D) :=
+    entry(I,L,msg(crdhldrEntCvd),D).
+
+event_phenomenon neg_test:dut_outputs_irrelevant_messages(Id) :=
+    output(Id,_,msg(crdhldrMsgPresentCard)) or
+    output(Id,_,msg(crdhldrMsgPresentCardOrUseMagstripe)) or
+    output(Id,_,msg(crdhldrMsgInsertOrPresentCard)) or
+    output(Id,_,msg(crdhldrMsgPleaseInsertCard)).
 
 % TODO: Add support for internal data validation, probably through acquirer
 %       message, receipt or internally.
@@ -111,9 +137,9 @@ recognize :-
     recognition_query(100, 100, 100).
 
 assert_all_input_events :-
-    findall(input_event_instant(E,T), input_event(E,T), D),
+    findall(input_event_instant(E,T), input_event(T:E), D),
     maplist(assertz, D).
-input_event(exchange(Id,Payload), Time) :-
+input_event(Time:exchange(Id,Payload)) :-
     load_xml('/tmp/events', Xml, []),
     term_xml(Term, Xml),
     ['EventLogRecord'(ts(First),_)|_] = Term,
@@ -170,3 +196,23 @@ list_service_start_events([A,B,C,D,E,F,G,H], S) :-
         accept(F),
         cardholderDetect(G),
         rfu(H)).
+
+number_interface_status(N, S) :-
+    number_digits(8, N, [A,B,C,D,E,F,G,H]),
+    S = interfaceStatus(
+        % Cardholder facing interfaces
+        cardholder(
+            chipReader(A),
+            magneticStripeReader(B),
+            contactlessReader(G),
+            % Unspecified, any proprietary type of cardholder detection
+            detect(H)
+        ),
+        % Attendant facing interfaces
+        attendant(
+            numericKeypad(C),
+            fKeyManualEntry(D),
+            fKeyReferenceEntry(E),
+            fKeyAccept(F)
+        )
+    ).
