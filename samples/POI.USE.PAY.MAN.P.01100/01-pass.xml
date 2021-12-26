@@ -1,0 +1,24 @@
+<EventLogRecord><ts>20211226110552.884444+0100</ts><ev><id>0</id><pd><ntf><events><serviceSelection><serviceId><payment /></serviceId></serviceSelection></events></ntf></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110552.89337+0100</ts><ev><id>15</id><pd><req><output><language>en</language><what><msg><crdhldrMsgWelcome /></msg></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110552.909377+0100</ts><ev><id>15</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110552.91072+0100</ts><ev><id>16</id><pd><req><updateInterfaces><interfaceStatus>00010111</interfaceStatus></updateInterfaces></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110552.946557+0100</ts><ev><id>16</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.259001+0100</ts><ev><id>0</id><pd><ntf><events><manualEntry><pan>4485936516057131</pan><expirationDate><year>22</year><month>11</month></expirationDate><cvdData><cvd>0111</cvd></cvdData></manualEntry><amountEntry><totalAmount>12345</totalAmount><supplementaryAmount><amount>0</amount></supplementaryAmount><cashbackAmount>0</cashbackAmount></amountEntry></events></ntf></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.266095+0100</ts><ev><id>17</id><pd><req><output><language>en</language><what><trxAmount>12345</trxAmount><trxCurrencyAlpha3>EUR</trxCurrencyAlpha3><trxCurrencyExponent>2</trxCurrencyExponent></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.27867+0100</ts><ev><id>17</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.280152+0100</ts><ev><id>18</id><pd><req><updateInterfaces><interfaceStatus>00000000</interfaceStatus></updateInterfaces></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.322626+0100</ts><ev><id>18</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.324439+0100</ts><ev><id>19</id><pd><req><output><language>en</language><what><msg><crdhldrEmvPleaseWait /></msg></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.363091+0100</ts><ev><id>19</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.364929+0100</ts><ev><id>20</id><pd><req><output><language>en</language><what><msg><crdhldrEmvApproved /></msg><selectedService><payment /></selectedService></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.432766+0100</ts><ev><id>20</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.435039+0100</ts><ev><id>21</id><pd><req><output><language>en</language><what><ssn><crdhldrSsnCardRemoved /></ssn></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.560023+0100</ts><ev><id>21</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.561338+0100</ts><ev><id>22</id><pd><req><print><type><merchantReceipt /></type></print></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.62777+0100</ts><ev><id>22</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.630173+0100</ts><ev><id>23</id><pd><req><print><type><cardholderReceipt /></type></print></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.727074+0100</ts><ev><id>23</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.728447+0100</ts><ev><id>24</id><pd><req><output><language>en</language><what><msg><crdhldrMsgWelcome /></msg></what></output></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.845791+0100</ts><ev><id>24</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.847423+0100</ts><ev><id>25</id><pd><req><updateInterfaces><interfaceStatus>00010011</interfaceStatus></updateInterfaces></req></pd></ev></EventLogRecord>
+<EventLogRecord><ts>20211226110608.919162+0100</ts><ev><id>25</id><pd><rsp><ack /></rsp></pd></ev></EventLogRecord>
