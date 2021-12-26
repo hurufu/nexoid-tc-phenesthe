@@ -142,9 +142,8 @@ assert_all_input_events :-
 input_event(Time:exchange(Id,Payload)) :-
     load_xml('/tmp/events', Xml, []),
     term_xml(Term, Xml),
-    ['EventLogRecord'(ts(First),_)|_] = Term,
     member('EventLogRecord'(ts(T),ev(Id,pd(Payload))), Term),
-    Time is truncate((T - First + 1) * 100000000).
+    ts_atom_timestamp(T,Time).
 
 query(P) :-
     (
@@ -170,6 +169,21 @@ main :-
 answer([]) --> [].
 answer([H|T]) --> term(H), ['\n'], answer(T).
 term(T) --> { term_string(T, S), string_chars(S, C) }, C.
+
+ts_atom_timestamp(T,N) :-
+    atom_chars(T, Ts),
+    phrase(gtime(Ms,Ss), Ts),
+    number_chars(M, Ms),
+    number_chars(S, Ss),
+    N is M * 60 + S.
+
+gtime(M,S) --> any, minute(M), second(S), timezone.
+timezone --> (['+']|['-']), any.
+minute([M1,M2]) --> [M1,M2].
+second([S1,S2,'.'|F]) --> [S1,S2], ['.'], fraction(F).
+fraction([]) --> [].
+fraction([H|T]) --> [H], fraction(T).
+any --> [] | [_], any.
 
 term_xml([], []).
 term_xml([Y], [X]) :-
