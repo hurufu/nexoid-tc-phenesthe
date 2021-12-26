@@ -132,18 +132,22 @@ event_phenomenon neg_test:dut_outputs_irrelevant_messages(Id) :=
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 recognize :-
-    assert_all_input_events,
+    findall(input_event_instant(E,T), input_event(T:E), D),
+    maplist(assertz, D),
     preprocess_phenomena_definitions,
     recognition_query(100, 100, 100).
 
-assert_all_input_events :-
-    findall(input_event_instant(E,T), input_event(T:E), D),
-    maplist(assertz, D).
+main :-
+    setof(P, query(P), L),
+    phrase(answer(L), W),
+    atom_string(A, W),
+    write(A).
+
 input_event(Time:exchange(Id,Payload)) :-
     load_xml('/tmp/events', Xml, []),
     term_xml(Term, Xml),
     member('EventLogRecord'(ts(T),ev(Id,pd(Payload))), Term),
-    ts_atom_timestamp(T,Time).
+    ts_atom_timestamp(T, Time).
 
 query(P) :-
     (
@@ -153,18 +157,6 @@ query(P) :-
     ),
     P =.. [G,_,_],
     call(P).
-
-query_single(Q) :-
-    query(P),
-    P =.. [G,T,L],
-    member(X, L),
-    Q =.. [G,T,X].
-
-main :-
-    setof(P, query(P), L),
-    phrase(answer(L), W),
-    atom_string(A, W),
-    write(A).
 
 answer([]) --> [].
 answer([H|T]) --> term(H), ['\n'], answer(T).
