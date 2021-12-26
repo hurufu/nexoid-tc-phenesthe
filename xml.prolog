@@ -99,8 +99,12 @@ dynamic_phenomenon entry(Id,prompt(Language,Message),entry(EnteredData)) :=
 dynamic_phenomenon test:payment_service_is_triggered_by_entering_pan_and_expiry_data_and_amount(amount(T,S,C), manual(P,Y,M)) :=
     payment before (manual(P,Y,M) and amount(T,S,C)).
 
-dynamic_phenomenon test:contactless_reader_isnt_activated :=
-    update(_,0) before output(_,_,msg(crdhldrEmvPleaseWait)).
+dynamic_phenomenon test:contactless_reader_isnt_activated(Id1,Id2) :=
+    (
+        exchange(Id1,req(updateInterfaces(interfaceStatus(0)))) before exchange(Id1,rsp(ack))
+    ) before (
+        output(Id2,_,msg(crdhldrEmvPleaseWait))
+    ).
 
 % It is impossible for libnexoid to ask for an amount, so this test always passes
 event_phenomenon neg_test:dut_prompts_for_an_amount := false.
