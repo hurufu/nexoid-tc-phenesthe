@@ -95,7 +95,7 @@ dynamic_phenomenon entry(Id,prompt(Language,Message),entry(EnteredData)) :=
 % Pass criteria for POI.USE.PAY.MAN.P.01100
 
 % FIXME: Actually payment may be selected at the same time as an amount or manual
-% entry or even it may be set beforhead as a default service
+% entry or even it may be set beforehead as a default service
 dynamic_phenomenon test:payment_service_is_triggered_by_entering_pan_and_expiry_data_and_amount(amount(T,S,C), manual(P,Y,M)) :=
     payment before (manual(P,Y,M) and amount(T,S,C)).
 
